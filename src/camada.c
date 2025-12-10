@@ -18,8 +18,8 @@ status_t camada_inicializar(uint32_t n_entrada, uint32_t n_neuronios, funcao_ati
         return status_erro("Dimensão inválida!\n");
     }
     size_t tamanho_bloco_memoria = sizeof(camada_t) +
-                                   3 * sizeof(PRECISAO) * n_neuronios +
-                                   sizeof(PRECISAO) * n_entrada * n_neuronios;
+                                   3 * sizeof(precisao_t) * n_neuronios +
+                                   sizeof(precisao_t) * n_entrada * n_neuronios;
 
     void *data = malloc(tamanho_bloco_memoria);
 
@@ -32,15 +32,15 @@ status_t camada_inicializar(uint32_t n_entrada, uint32_t n_neuronios, funcao_ati
     camada->n_entradas = n_entrada;
     camada->f_ativacao = fa;
 
-    camada->b = (PRECISAO *)(camada + 1);
+    camada->b = (precisao_t *)(camada + 1);
     camada->a = camada->b + n_neuronios;
     camada->z = camada->a + n_neuronios;
     camada->w = camada->z + n_neuronios;
 
-    memset((void *)camada->b, 0, n_neuronios * sizeof(PRECISAO)); // limpa o vies
+    memset((void *)camada->b, 0, n_neuronios * sizeof(precisao_t)); // limpa o vies
     for (uint32_t i = 0; i < camada->n_neuronios * camada->n_entradas; ++i)
     {
-        camada->w[i] = 2.0 * (((PRECISAO)rand()) / ((PRECISAO)RAND_MAX)) - 1.0; // normalizado entre -1 e 1
+        camada->w[i] = 2.0 * (((precisao_t)rand()) / ((precisao_t)RAND_MAX)) - 1.0; // normalizado entre -1 e 1
     }
 
     return status_sucesso((void *)camada);
@@ -61,7 +61,7 @@ void camada_destruir(camada_t *camada)
     }
 }
 
-status_t camada_feedforward(camada_t *camada, PRECISAO *dados)
+status_t camada_feedforward(camada_t *camada, precisao_t *dados)
 {
     if (dados == NULL)
     {

@@ -41,7 +41,7 @@ status_t mlp_adic_camada(mlp_t *builder, camada_t *camada)
     return status_sucesso(NULL);
 }
 
-status_t mlp_feedforward(mlp_t *mlp, PRECISAO *dados)
+status_t mlp_feedforward(mlp_t *mlp, precisao_t *dados)
 {
     if (dados == NULL)
     {

@@ -20,38 +20,38 @@ void fa_liberar_recursos()
 }
 
 // Classificação binária simples
-PRECISAO fa_step(PRECISAO x)
+precisao_t fa_step(precisao_t x)
 {
     return (x < 0.0) ? 0.0 : 1.0;
 }
 
 // Classificação binária
-PRECISAO fa_sigmoid(PRECISAO x)
+precisao_t fa_sigmoid(precisao_t x)
 {
     return 1.0 / (1.0 + EXPONENCIAL(-x));
 }
 
 // ?
-PRECISAO fa_relu(PRECISAO x)
+precisao_t fa_relu(precisao_t x)
 {
     return (x > 0.0) ? x : 0.0;
 }
 
 // Para ajustes normalizados entre o 0
-PRECISAO fa_tanh(PRECISAO x)
+precisao_t fa_tanh(precisao_t x)
 {
     return tanhf(x);
 }
 
 // ?
-PRECISAO fa_leaky_relu(PRECISAO x)
+precisao_t fa_leaky_relu(precisao_t x)
 {
     return (x > 0.0) ? x : 0.01 * x;
 }
 
 #ifdef HABILITAR_SOFTMAX_BUFFER
 uint32_t sofmax_buffer_tam = SOFTMAX_INICIAL_BUFFER_TAM;
-PRECISAO *sofmax_buffer = NULL;
+precisao_t *sofmax_buffer = NULL;
 
 status_t fa_redimensionar_buffer_softmax(uint32_t n)
 {
@@ -63,10 +63,10 @@ status_t fa_redimensionar_buffer_softmax(uint32_t n)
     sofmax_buffer_tam = n;
     if (sofmax_buffer == NULL)
     {
-        sofmax_buffer = malloc(sofmax_buffer_tam * sizeof(PRECISAO));
+        sofmax_buffer = malloc(sofmax_buffer_tam * sizeof(precisao_t));
         return (sofmax_buffer == NULL) ? status_erro("Falha em manipular buffer do softmax!\n") : status_sucesso(NULL);
     }
-    void *aux = realloc(sofmax_buffer, sofmax_buffer_tam * sizeof(PRECISAO));
+    void *aux = realloc(sofmax_buffer, sofmax_buffer_tam * sizeof(precisao_t));
     if (aux == NULL)
     {
         return status_erro("Falha em manipular buffer do softmax. Erro ao usar realloc .\n");
@@ -86,7 +86,7 @@ void fa_liberar_buffer_softmax()
 }
 #endif
 
-status_t fa_softmax(PRECISAO *x, PRECISAO *saida, uint32_t n)
+status_t fa_softmax(precisao_t *x, precisao_t *saida, uint32_t n)
 {
     if (x == NULL || saida == NULL)
     {
@@ -106,7 +106,7 @@ status_t fa_softmax(PRECISAO *x, PRECISAO *saida, uint32_t n)
     }
 #endif
 
-    PRECISAO soma = 0.0;
+    precisao_t soma = 0.0;
     for (uint32_t i = 0; i < n; ++i)
     {
 #ifdef HABILITAR_SOFTMAX_BUFFER
@@ -129,37 +129,37 @@ status_t fa_softmax(PRECISAO *x, PRECISAO *saida, uint32_t n)
     return status_sucesso(NULL);
 }
 
-PRECISAO fa_dstep(PRECISAO x)
+precisao_t fa_dstep(precisao_t x)
 {
     return (x == 0.0) ? 1.0 : 0;
 }
-PRECISAO fa_dsigmoid(PRECISAO x)
+precisao_t fa_dsigmoid(precisao_t x)
 {
-    PRECISAO sigmoid_x = fa_sigmoid(x);
+    precisao_t sigmoid_x = fa_sigmoid(x);
     return fa_dsigmoid_opt(sigmoid_x);
 }
-PRECISAO fa_dsigmoid_opt(PRECISAO sigmoid_x)
+precisao_t fa_dsigmoid_opt(precisao_t sigmoid_x)
 {
     return sigmoid_x / (1 - sigmoid_x);
 }
-PRECISAO fa_drelu(PRECISAO x)
+precisao_t fa_drelu(precisao_t x)
 {
     return (x > 0.0) ? 1 : 0.0;
 }
-PRECISAO fa_dtanh(PRECISAO x)
+precisao_t fa_dtanh(precisao_t x)
 {
-    PRECISAO tanh_x = fa_tanh(x);
+    precisao_t tanh_x = fa_tanh(x);
     return fa_dtanh_opt(tanh_x);
 }
-PRECISAO fa_dtanh_opt(PRECISAO tanh_x)
+precisao_t fa_dtanh_opt(precisao_t tanh_x)
 {
     return 1 - (tanh_x * tanh_x);
 }
-PRECISAO fa_dleaky_relu(PRECISAO x)
+precisao_t fa_dleaky_relu(precisao_t x)
 {
     return (x > 0.0) ? 1 : 0.01;
 }
-status_t fa_dsoftmax(PRECISAO *x, PRECISAO *saida, uint32_t n)
+status_t fa_dsoftmax(precisao_t *x, precisao_t *saida, uint32_t n)
 {
     return status_erro("Não implementado");
 }

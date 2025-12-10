@@ -15,7 +15,7 @@
     #error "Defina PRECISAO_32 ou PRECISAO_64 como 1"
 #endif
 
-
+typedef PRECISAO precisao_t;
 
 
 #define HABILITAR_SOFTMAX_BUFFER 1

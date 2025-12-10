@@ -20,40 +20,40 @@ status_t fa_inicializar_recursos();
 
 void fa_liberar_recursos();
 
-PRECISAO fa_step(PRECISAO);
+precisao_t fa_step(precisao_t);
 
-PRECISAO fa_sigmoid(PRECISAO);
+precisao_t fa_sigmoid(precisao_t);
 
-PRECISAO fa_relu(PRECISAO);
+precisao_t fa_relu(precisao_t);
 
-PRECISAO fa_tanh(PRECISAO);
+precisao_t fa_tanh(precisao_t);
 
-PRECISAO fa_leaky_relu(PRECISAO);
+precisao_t fa_leaky_relu(precisao_t);
 
-status_t fa_softmax(PRECISAO *x, PRECISAO *saida, uint32_t n);
+status_t fa_softmax(precisao_t *x, precisao_t *saida, uint32_t n);
 
 
-PRECISAO fa_dstep(PRECISAO);
+precisao_t fa_dstep(precisao_t);
 
-PRECISAO fa_dsigmoid(PRECISAO);
+precisao_t fa_dsigmoid(precisao_t);
 
-PRECISAO fa_dsigmoid_opt(PRECISAO sigmoid_x);
+precisao_t fa_dsigmoid_opt(precisao_t sigmoid_x);
 
-PRECISAO fa_drelu(PRECISAO);
+precisao_t fa_drelu(precisao_t);
 
-PRECISAO fa_dtanh(PRECISAO);
+precisao_t fa_dtanh(precisao_t);
 
-PRECISAO fa_dtanh_opt(PRECISAO tanh_x);
+precisao_t fa_dtanh_opt(precisao_t tanh_x);
 
-PRECISAO fa_dleaky_relu(PRECISAO);
+precisao_t fa_dleaky_relu(precisao_t);
 
-status_t fa_dsoftmax(PRECISAO *x, PRECISAO *saida, uint32_t n);
+status_t fa_dsoftmax(precisao_t *x, precisao_t *saida, uint32_t n);
 
 
 
 #ifdef HABILITAR_SOFTMAX_BUFFER
 extern uint32_t sofmax_buffer_tam;
-extern PRECISAO *sofmax_buffer;
+extern precisao_t *sofmax_buffer;
 
 status_t fa_redimensionar_buffer_softmax(uint32_t n);
 void fa_liberar_buffer_softmax();

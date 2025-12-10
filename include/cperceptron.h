@@ -17,4 +17,4 @@ void mlp_destruir(mlp_t *mlp);
 
 status_t mlp_adic_camada(mlp_t *builder, camada_t *camada);
 
-status_t mlp_feedforward(mlp_t *mlp, PRECISAO *dados);
+status_t mlp_feedforward(mlp_t *mlp, precisao_t *dados);
