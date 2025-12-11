@@ -1,4 +1,5 @@
 #pragma once
+
 #include "cperceptron_conf.h"
 #include "status.h"
 
@@ -13,7 +14,13 @@ typedef enum funcao_ativacao
 
 } funcao_ativacao;
 
+#ifdef HABILITAR_SOFTMAX_BUFFER
+extern uint32_t sofmax_buffer_tam;
+extern precisao_t *sofmax_buffer;
 
+status_t fa_redimensionar_buffer_softmax(uint32_t n);
+void fa_liberar_buffer_softmax();
+#endif
 
 
 status_t fa_inicializar_recursos(); 
@@ -51,10 +58,3 @@ status_t fa_dsoftmax(precisao_t *x, precisao_t *saida, uint32_t n);
 
 
 
-#ifdef HABILITAR_SOFTMAX_BUFFER
-extern uint32_t sofmax_buffer_tam;
-extern precisao_t *sofmax_buffer;
-
-status_t fa_redimensionar_buffer_softmax(uint32_t n);
-void fa_liberar_buffer_softmax();
-#endif

@@ -48,17 +48,16 @@ status_t camada_inicializar(uint32_t n_entrada, uint32_t n_neuronios, funcao_ati
 
 void camada_destruir(camada_t *camada)
 {
-    if (camada != NULL)
-    {
-        camada->n_neuronios = 0;
-        camada->n_entradas = 0;
+    if (camada == NULL)
+        return;
+    camada->n_neuronios = 0;
+    camada->n_entradas = 0;
 
-        camada->b = NULL;
-        camada->a = NULL;
-        camada->z = NULL;
-        camada->w = NULL;
-        free(camada);
-    }
+    camada->b = NULL;
+    camada->a = NULL;
+    camada->z = NULL;
+    camada->w = NULL;
+    free(camada);
 }
 
 status_t camada_feedforward(camada_t *camada, precisao_t *dados)
@@ -74,6 +73,6 @@ status_t camada_feedforward(camada_t *camada, precisao_t *dados)
         {
             camada->z[neuronio_i] += dados[dados_entrada_i];
         }
-        // camada->a = 
+        // camada->a =
     }
 }

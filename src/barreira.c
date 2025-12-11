@@ -1,8 +1,7 @@
 #include "barreira.h"
-#include <stdlib.h>
-#include <pthread.h>
-#include <stdint.h>
-#include "status.h"
+
+
+static void barreira_destuir(barreira_t *barreira);
 
 status_t barreira_inicializar(uint32_t recursos)
 {
@@ -28,18 +27,8 @@ status_t barreira_inicializar(uint32_t recursos)
         free(barreira);
         return status_erro("barreira_inicializar: pthread_cond_init falhou\n");
     }
-
+    barreira_incrementar_referencia(barreira);
     return status_sucesso(barreira);
-}
-
-void barreira_destuir(barreira_t *barreira)
-{
-    if (!barreira)
-        return;
-
-    pthread_mutex_destroy(&barreira->mutex);
-    pthread_cond_destroy(&barreira->lock);
-    free(barreira);
 }
 
 status_t barreira_incrementar_referencia(barreira_t *barreira)
@@ -69,13 +58,12 @@ status_t barreira_decrementar_referencia(barreira_t *barreira)
     {
         barreira->n_referencias--;
     }
-
-    if (barreira->notificado && barreira->n_referencias == 0)
-    {
-        pthread_cond_signal(&barreira->lock);
-    }
-
     pthread_mutex_unlock(&barreira->mutex);
+    
+    if(barreira->n_referencias == 0)
+    {
+        barreira_destuir(barreira);
+    }
     return status_sucesso(NULL);
 }
 
@@ -95,7 +83,7 @@ status_t barreira_decrementar_recurso(barreira_t *barreira)
 
     barreira->notificado = (barreira->recursos == 0);
 
-    if (barreira->notificado && barreira->n_referencias == 0)
+    if (!barreira->notificado)
     {
         pthread_cond_signal(&barreira->lock);
     }
@@ -113,7 +101,7 @@ status_t barreira_aguardar(barreira_t *barreira)
 
     pthread_mutex_lock(&barreira->mutex);
 
-    while (!barreira->notificado || barreira->n_referencias != 0)
+    while (!barreira->notificado)
     {
         pthread_cond_wait(&barreira->lock, &barreira->mutex);
     }
@@ -122,19 +110,12 @@ status_t barreira_aguardar(barreira_t *barreira)
     return status_sucesso(NULL);
 }
 
-status_t barreira_renovar_recurso(barreira_t *barreira, uint32_t recursos)
+static void barreira_destuir(barreira_t *barreira)
 {
     if (!barreira)
-    {
-        return status_erro("barreira_renovar_recurso: barreira NULL");
-    }
+        return;
 
-    pthread_mutex_lock(&barreira->mutex);
-
-    barreira->n_referencias = 0;
-    barreira->recursos = recursos;
-    barreira->notificado = false;
-
-    pthread_mutex_unlock(&barreira->mutex);
-    return status_sucesso(barreira);
+    pthread_mutex_destroy(&barreira->mutex);
+    pthread_cond_destroy(&barreira->lock);
+    free(barreira);
 }

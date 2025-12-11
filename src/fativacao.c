@@ -1,8 +1,7 @@
 #include "fativacao.h"
 #include <stdlib.h>
 #include <math.h>
-#include "cperceptron_conf.h"
-#include "status.h"
+
 
 status_t fa_inicializar_recursos()
 {
