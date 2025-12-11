@@ -1,7 +1,6 @@
 #include "barreira.h"
 
-
-static void barreira_destuir(barreira_t *barreira);
+static void barreira_destuir(void *ptr_barreira);
 
 status_t barreira_inicializar(uint32_t recursos)
 {
@@ -11,7 +10,6 @@ status_t barreira_inicializar(uint32_t recursos)
         return status_erro("barreira_inicializar: Falha ao alocar memória\n");
     }
 
-    barreira->n_referencias = 0;
     barreira->recursos = recursos;
     barreira->notificado = false;
 
@@ -27,47 +25,28 @@ status_t barreira_inicializar(uint32_t recursos)
         free(barreira);
         return status_erro("barreira_inicializar: pthread_cond_init falhou\n");
     }
-    barreira_incrementar_referencia(barreira);
+
+    status_t res = cr_inicializar(barreira_destuir, barreira);
+    if (!res.sucesso)
+    {
+        barreira_destuir(barreira);
+        return res;
+    }
+    barreira->cnt_referencias = (contador_referencia_t *)res.resultado;
     return status_sucesso(barreira);
 }
 
-status_t barreira_incrementar_referencia(barreira_t *barreira)
+status_t barreira_incr_referencia(barreira_t *barreira)
 {
-    if (!barreira)
-    {
-        return status_erro("barreira_incrementar_referencia: barreira NULL");
-    }
-
-    pthread_mutex_lock(&barreira->mutex);
-    barreira->n_referencias++;
-    pthread_mutex_unlock(&barreira->mutex);
-
-    return status_sucesso(NULL);
+    return cr_incr_referencia(barreira->cnt_referencias);
 }
 
-status_t barreira_decrementar_referencia(barreira_t *barreira)
+status_t barreira_decr_referencia(barreira_t *barreira)
 {
-    if (!barreira)
-    {
-        return status_erro("barreira_decrementar_referencia: barreira NULL");
-    }
-
-    pthread_mutex_lock(&barreira->mutex);
-
-    if (barreira->n_referencias > 0)
-    {
-        barreira->n_referencias--;
-    }
-    pthread_mutex_unlock(&barreira->mutex);
-    
-    if(barreira->n_referencias == 0)
-    {
-        barreira_destuir(barreira);
-    }
-    return status_sucesso(NULL);
+    return cr_decr_referencia(barreira->cnt_referencias);
 }
 
-status_t barreira_decrementar_recurso(barreira_t *barreira)
+status_t barreira_decr_recurso(barreira_t *barreira)
 {
     if (!barreira)
     {
@@ -110,8 +89,10 @@ status_t barreira_aguardar(barreira_t *barreira)
     return status_sucesso(NULL);
 }
 
-static void barreira_destuir(barreira_t *barreira)
+// Critico. Só destroi via contador de referências
+static void barreira_destuir(void *ptr_barreira) 
 {
+    barreira_t *barreira = (barreira_t *)ptr_barreira;
     if (!barreira)
         return;
 
