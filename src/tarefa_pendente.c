@@ -1,4 +1,4 @@
-#include "tarefa.h"
+#include "tarefa_pendente.h"
 
 static void tarefa_pendente_destruir(void *ptr_tarefa);
 
@@ -98,3 +98,4 @@ static void tarefa_pendente_destruir(void *ptr_tarefa)
     pthread_cond_destroy(&tarefa->lock);
     free(tarefa);
 }
+

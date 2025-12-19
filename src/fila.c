@@ -72,7 +72,7 @@ status_t fila_remo(fila_t *fila)
     if (fila == NULL)
         return status_erro("fila_remo: fila NULL\n");
 
-    if (fila->n_elementos == 0 || fila->primeiro == NULL)
+    if (!fila->n_elementos || fila->primeiro == NULL)
         return status_erro("fila_remo: fila vazia\n");
 
     no_fila_t *removido = fila->primeiro;
@@ -81,9 +81,14 @@ status_t fila_remo(fila_t *fila)
     fila->primeiro = removido->proximo;
     fila->n_elementos--;
 
-    if (fila->n_elementos == 0)
+    if (!fila->n_elementos)
         fila->ultimo = NULL;
 
     free(removido);
     return status_sucesso(valor);
+}
+
+bool fila_vazia(fila_t *fila)
+{
+    return !fila->n_elementos;
 }

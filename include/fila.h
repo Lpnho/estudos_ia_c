@@ -20,3 +20,5 @@ void fila_destruir(fila_t *fila);
 
 status_t fila_adic(fila_t *fila, void* arg);
 status_t fila_remo(fila_t *fila);
+
+bool fila_vazia(fila_t* fila);

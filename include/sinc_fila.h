@@ -17,3 +17,5 @@ void sinc_fila_destruir(sinc_fila_t *fila);
 
 status_t sinc_fila_adic(sinc_fila_t *fila, void* arg);
 status_t sinc_fila_remo(sinc_fila_t *fila);
+
+bool sinc_fila_vazia(sinc_fila_t *fila);

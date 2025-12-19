@@ -1,14 +1,13 @@
 #include "trabalhador.h"
 
-status_t trabalhador_inicializar(pthread_t *thread, sem_t *sinal_termino)
+status_t trabalhador_inicializar(
+    tarefa_desc_t obter_tarefa_pendente,
+    tarefa_desc_t finalizar_tarefa)
 {
-    if (thread == NULL)
+    if (obter_tarefa_pendente.func == NULL ||
+        finalizar_tarefa.func == NULL)
     {
-        return status_erro("trabalhador_inicializar: thread trabalhadora NULL\n");
-    }
-    if (sinal_termino == NULL)
-    {
-        return status_erro("trabalhador_inicializar: semafono trabalhadora NULL\n");
+        return status_erro("trabalhador_inicializar: callbacks não implementadas: NULL\n");
     }
 
     trabalhador_t *trabalhador = malloc(sizeof(trabalhador_t));
@@ -17,8 +16,8 @@ status_t trabalhador_inicializar(pthread_t *thread, sem_t *sinal_termino)
         return status_erro("trabalhador_inicializar: falha ao alocar memoria\n");
     }
     trabalhador->executando_tarefa = false;
-    trabalhador->semaforo_termino = sinal_termino;
-    trabalhador->thread = thread;
+    trabalhador->obter_tarefa_pendente = obter_tarefa_pendente;
+    trabalhador->finalizar_tarefa = finalizar_tarefa;
 
     if (!pthread_mutex_init(&trabalhador->mutex, NULL))
     {
@@ -34,6 +33,13 @@ status_t trabalhador_inicializar(pthread_t *thread, sem_t *sinal_termino)
     }
     atomic_init(&trabalhador->rodando, true);
 
+    if (!pthread_create(&trabalhador->thread, NULL, trabalhador_executar, (void *)&trabalhador))
+    {
+        pthread_mutex_destroy(&trabalhador->mutex);
+        pthread_cond_destroy(&trabalhador->lock);
+        free(trabalhador);
+        return status_erro("trabalhador_inicializar: pthread_create falhou\n");
+    }
     return status_sucesso(trabalhador);
 }
 
@@ -48,10 +54,7 @@ void trabalhador_destruir(trabalhador_t *trabalhador)
     pthread_cond_signal(&trabalhador->lock);
     pthread_mutex_unlock(&trabalhador->lock);
 
-    if (trabalhador->thread != NULL)
-    {
-        pthread_join(*trabalhador->thread, NULL);
-    }
+    pthread_join(trabalhador->thread, NULL);
 
     pthread_mutex_destroy(&trabalhador->mutex);
     pthread_cond_destroy(&trabalhador->lock);
@@ -61,7 +64,7 @@ void trabalhador_destruir(trabalhador_t *trabalhador)
 void *trabalhador_executar(void *arg)
 {
     trabalhador_t *trabalhador = (trabalhador_t *)arg;
-
+    tarefa_pendente_t *tarefa = NULL;
     while (atomic_load_explicit(&trabalhador->rodando, memory_order_acquire))
     {
         pthread_mutex_lock(&trabalhador->mutex);
@@ -69,12 +72,18 @@ void *trabalhador_executar(void *arg)
         {
             pthread_cond_wait(&trabalhador->lock, &trabalhador->mutex);
         }
-        if (trabalhador->tarefa != NULL)
+        tarefa_desc_executar(&trabalhador->obter_tarefa_pendente);
+
+        tarefa = (tarefa_pendente_t *)(trabalhador->obter_tarefa_pendente.ret);
+        if (tarefa != NULL)
         {
-            tarefa_pendente_executar_tarefa(trabalhador->tarefa);
+            tarefa_pendente_incr_referencia(tarefa);
+            tarefa_pendente_executar_tarefa(tarefa);
+            tarefa_pendente_decr_referencia(tarefa);
         }
 
         pthread_mutex_unlock(&trabalhador->mutex);
+        tarefa_desc_executar(&trabalhador->finalizar_tarefa);
     }
 
     pthread_exit(NULL);

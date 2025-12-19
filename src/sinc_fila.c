@@ -56,3 +56,11 @@ status_t sinc_fila_remo(sinc_fila_t *fila)
     pthread_mutex_unlock(&fila->mutex);
     return result;
 }
+
+bool sinc_fila_vazia(sinc_fila_t *fila)
+{
+    pthread_mutex_lock(&fila->mutex);
+    bool result = fila_vazia(fila->fila);
+    pthread_mutex_unlock(&fila->mutex);
+    return result;
+}
